@@ -1,5 +1,7 @@
 # Degree Checklist
 
+**Free, private, no ads. No accounts, no tracking. Your progress never leaves your device.**
+
 A phone-friendly checklist for college degree requirements. Check off classes once and see how far along every degree is, which classes count toward more than one degree, what is still needed, your XP level, and your GPA. It comes with three sample degrees and can load any other degree.
 
 Everything you check off is stored **only on your own device**. There is no account, no server and no tracking.
@@ -66,7 +68,8 @@ Rules:
 
 ## Privacy and security
 
-- Your progress, characters and added degrees never leave your device. Catalog files you add are read inside your browser and are not uploaded.
+- Your progress, grades, character choice and added degrees are saved in the browser storage on your own device and are never sent anywhere. There is no server and no account. (This storage is separate from browsing history. Clearing website data erases it, which is why Backup exists.)
+- Two honest notes: GitHub, as the host, can see ordinary web traffic such as visit counts, and the fonts load from Google Fonts, so Google sees a font request. Neither can see anyone's progress. Catalog files you add are read inside your browser and are not uploaded. The app contains no ads or analytics.
 - GitHub Pages serves the site over HTTPS. The page declares a strict Content Security Policy that only allows its own code plus Google Fonts and the PDF reader from cdnjs.
 - The repository only holds the app. If you keep it public, anyone can open the app (that is how other students use it), but nobody can see anyone's progress. Free GitHub Pages needs a public repository. A private repository needs a paid plan, or you can host the same files on Cloudflare Pages or Netlify.
 - Turn on two-factor sign-in for your GitHub account so nobody else can change the files.
@@ -77,3 +80,23 @@ Rules:
 - The first visit needs internet. The fonts (Google Fonts) and the PDF reader (cdnjs) load from the web and are saved for offline use after they have been used once. If they cannot load, the app falls back to system fonts and the JSON and paste options still work.
 - **Updating:** replace `index.html` on GitHub, and change the `VERSION` text at the top of `sw.js` (for example `degree-checklist-v2`) so phones pick up the new version.
 - Characters are your own art, cut out and recolored to match the interface.
+
+## Tip link (optional)
+
+The app can show a small **Support** button that opens your tip page (Ko-fi, Buy Me a Coffee, GitHub Sponsors) in a new tab. Nothing loads from the tip site until someone taps it, so it adds no tracking. To turn it on:
+
+1. Open `index.html` on GitHub and click the pencil icon.
+2. Find the line `var TIP_URL="";` (use the browser's find, Ctrl+F).
+3. Put your page address between the quotes, for example `var TIP_URL="https://ko-fi.com/yourname";`. It must start with `https://`.
+4. Commit the change, then change the `VERSION` text in `sw.js` (for example to `degree-checklist-v3`) so phones pick up the update.
+
+Until a link is set, the button stays hidden.
+
+
+## Transfer agreements (ASSIST)
+
+Download an agreement PDF from assist.org yourself, then open **Degrees → Choose PDF or JSON files** and pick it. Review the preview and press **Add this transfer agreement**. A **Transfer** tab appears, and a **Transfer** button in the highlight row outlines your classes that count, in faint purple.
+
+Agreements change every year. Always confirm with a counselor. Classes needed only for transfer do not add XP.
+
+JSON format, if you would rather make it with an AI: `{"kind":"transfer","university","short","from","major","year","groups":[{"name","pick","rows":[{"university":{"code","title","units"},"college":[{"code","title","units","substitute"}],"status":"articulated|not_articulated|never"}]}]}`.
