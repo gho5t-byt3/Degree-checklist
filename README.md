@@ -41,7 +41,7 @@ These steps use Chaffey College as the example. Other colleges are similar. Look
 
 <img src="guide/catalog-6.jpg" alt="Degree page with Export Page as PDF highlighted" width="520">
 
-**7. Add it to the app.** Open **Degrees** at the bottom of the app (or the **＋ Add** tab) and choose the PDF. Check the preview against the catalog page, then press **Add**.
+**7. Add it to the app.** Open **Settings** at the top of the app (or tap the **＋ Add** tab), find the **Degrees** section, and choose the PDF. Check the preview against the catalog page, then press **Add**.
 
 <img src="guide/add-in-app.svg" alt="Steps in the app: choose the PDF, check the preview, press Add, and the degree appears as a new tab" width="640">
 
@@ -62,7 +62,7 @@ To undo a mistake, open the degree and press **Remove this degree**.
 
 ## Backups
 
-Progress is stored in your browser on your own device. Clearing website data, deleting the app or switching phones erases it. Use **Backup** at the top of the page to save a file and **Restore** to load it anywhere. iPhones can clear storage for sites unused for about a week, so add it to the Home Screen and keep a backup.
+Progress is stored in your browser on your own device. Clearing website data, deleting the app or switching phones erases it. Open **Settings** at the top of the page and use **Backup** to save a file and **Restore** to load it anywhere. iPhones can clear storage for sites unused for about a week, so add it to the Home Screen and keep a backup.
 
 ## Privacy
 

@@ -439,6 +439,91 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
 .row.done:not(.dim){opacity:.6}
 .row.done:not(.dim):focus-within,.row.done:not(.dim):hover{opacity:.9}
 
+/* declutter */
+.strip{display:none}
+.tabs{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.tab{padding:10px 12px;gap:6px}
+.tab-sub,.dots,.tab-foot{display:none}
+.tab-num b{font-size:18px}
+.tbar{display:block;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--ink)}
+.hud{padding:16px 16px 12px;margin-bottom:18px}
+.hud-grid{grid-template-columns:104px minmax(0,1fr);gap:14px}
+.avatar{max-width:104px}
+.hlbar{margin-bottom:10px}
+.hltog{border-style:dashed}
+.rowmore{background:transparent;border:1px solid var(--faint);color:var(--mid);border-radius:999px;min-width:34px;height:28px;padding:0 10px;font-size:13px;letter-spacing:.08em}
+.rowmore:hover{border-color:var(--ink);color:var(--ink)}
+.stag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);border:1px solid var(--ink);border-radius:999px;padding:1px 9px}
+.setbox{padding:16px 18px;margin-bottom:16px}
+.setbox h3,.sethead{margin:0 0 10px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);font-weight:500}
+.sethead{margin-top:24px}
+body:not([data-page="settings"]) #mgr{display:none}
+body[data-page="settings"] #hud{display:none}
+body[data-page="settings"] #mgr>summary{display:none}
+.mini{gap:4px 18px;margin-top:10px;padding-top:8px}
+.mini dd{font-size:15px}
+.mini dt{font-size:9px}
+.xp-read{margin-top:8px}
+.lvl-row{margin-bottom:8px}
+.console{margin-top:8px;padding-top:8px}
+.hearts{gap:8px}
+.hearts svg{width:22px;height:19px}
+.ctl-lab{display:none}
+@media (max-width:700px){
+  .tab{flex:0 0 min(46%,190px)}
+  .hud{padding:14px 12px 10px}
+}
+.tab{min-width:0}
+.tab-head{flex-wrap:wrap;gap:4px 8px;justify-content:flex-start}
+.tab-name{min-width:0;overflow-wrap:anywhere}
+.tab-badge{flex:none}
+@media (max-width:700px){.tab{flex:0 0 176px}}
+.tab-name{overflow-wrap:normal;word-break:normal;font-size:10.5px;letter-spacing:.03em}
+@media (max-width:700px){.tab{flex:0 0 196px}}
+
+/* responsive: cover screens, phones, folds, tablets, desktop */
+.page{padding-top:max(20px,env(safe-area-inset-top,0px));padding-bottom:max(48px,env(safe-area-inset-bottom,0px))}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+img,svg{max-width:100%}
+.meta,.fitrow,.hlbar,.tools{flex-wrap:wrap}
+@media (max-width:360px){
+  .page{padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  h1{font-size:22px}
+  .hud-grid{grid-template-columns:1fr;justify-items:center}
+  .avatar{max-width:96px}
+  .tab{flex:0 0 150px;padding:8px 10px}
+  .tab-name{font-size:10px;letter-spacing:.02em}
+  .tab-num b{font-size:16px}
+  .row{padding:9px 10px}
+  .meta{padding-left:0}
+  .chip{padding:7px 11px;min-height:36px;font-size:11.5px}
+  .setbox{padding:12px 12px}
+  .xuni{padding:10px 10px 2px}
+  .xnote{margin-left:12px}
+  .tools{gap:8px}
+}
+@media (min-width:701px) and (max-width:1099px){
+  .hud-grid{grid-template-columns:150px minmax(0,1fr)}
+  .avatar{max-width:150px}
+  .tabs{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  body{font-size:13.5px}
+}
+@media (min-width:1100px){
+  .page{max-width:1120px}
+  body{font-size:14px}
+  .hud-grid{grid-template-columns:190px minmax(0,1fr);gap:22px 36px}
+  .avatar{max-width:190px}
+  .tabs{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .hud{padding:22px 24px 16px}
+  #panel .list{display:grid;grid-template-columns:1fr 1fr}
+  #panel .list>.row,#panel .list>.slot,#panel .list>.xreq{border-top:1px dotted var(--line);border-left:1px dotted var(--line);margin:0}
+  #panel .list>.row+.row{border-top:1px dotted var(--line)}
+  #panel .list>*:nth-child(-n+2){border-top:0}
+  #panel .list>*:nth-child(odd){border-left:0}
+}
+@media (hover:none){.row.done:not(.dim):hover{opacity:.6}}
+
 </style>
 </head>
 <body>
@@ -754,7 +839,7 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
   var RANKS=["Booting","Operator","Technician","Admin","Engineer","Architect"];
 
   var done={}, taking={}, reg={};
-  var tab="all", xsel=0, hl="off", confirmReset=false, status="loading", lvlMsg="", lvlUp=false, lvlTimer=null;
+  var tab="all", xsel=0, hlOpen=false, legOpen=false, rowOpen="", hl="off", confirmReset=false, status="loading", lvlMsg="", lvlUp=false, lvlTimer=null;
   var ref=null, saving=false, dirty=false, timer=null;
   var LS="it-degree-checklist-done", LS_EQ="it-degree-equip", LS_CAT="it-degree-catalog", LS_CH="it-degree-chars", LS_SEL="it-degree-char", LS_FIT="it-degree-fit", LS_MINE="it-degree-mychar";
   var wardOpen=false;
@@ -820,10 +905,10 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
     return '<div class="'+cls+'">'+
       '<label class="lbl"><input type="checkbox" id="c-'+c.replace(/\s/g,"-")+'" data-code="'+esc(c)+'" data-fk="code:'+esc(c)+'"'+(isDone?" checked":"")+'>'+
       '<span class="main"><span class="code">'+esc(c)+'</span><span class="ttl">'+esc(t)+'</span></span></label>'+
-      '<div class="meta">'+(isDone?gradeSelect(c,done[c]):ipBtn(c)+rgBtn(c))+
+      '<div class="meta">'+(isDone?gradeSelect(c,done[c]):(rowOpen===c?ipBtn(c)+rgBtn(c)+'<button class="rowmore" data-rowmenu="'+esc(c)+'" data-fk="rm:'+esc(c)+'" aria-label="Close status options">Done</button>':(isTaking(c)?'<span class="stag">In progress</span>':(isReg(c)?'<span class="stag">Registered</span>':''))+'<button class="rowmore" data-rowmenu="'+esc(c)+'" data-fk="rm:'+esc(c)+'" aria-label="Status options for '+esc(c)+'" title="Mark in progress or registered">⋯</button>'))+
       '<span class="units">'+u+' units</span>'+
       (trh?'<span class="trtag" title="Counts for transfer">Transfer · '+esc(TR[c].join(", "))+'</span>':'')+(sh?'<span class="share s'+Math.min(sh,3)+'" aria-label="Counts toward '+sh+(sh===1?' degree':' degrees')+'" title="Counts toward '+sh+(sh===1?' degree':' degrees')+'">×'+sh+'</span>':'<span class="share s0" title="Not part of your degrees, only for transfer">transfer only</span>')+
-      pipsFor(c)+'</div></div>';
+      (hl==='off'?'':pipsFor(c))+'</div></div>';
   }
 
   var openSlots={};
@@ -933,8 +1018,7 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
       '<div class="xp-read"><span class="score"><span class="tag">XP</span><span class="val">'+fmt(p.xp)+'</span></span><span class="next">'+toNext+' XP to level '+(p.lvl+1)+'</span></div>'+
       '<dl class="mini"><div><dt>Classes done</dt><dd>'+p.n+' / '+ALL.length+'</dd></div><div><dt>Units</dt><dd>'+p.units+'</dd></div><div><dt>In progress</dt><dd>'+p.tn+'</dd></div><div><dt>Registered</dt><dd>'+p.rn+'</dd></div><div><dt>GPA</dt><dd>'+(p.gpa===null?"—":p.gpa.toFixed(2))+'</dd></div></dl>'+
       '<div class="console"><div class="ctl"><div class="hearts">'+hearts+'</div><span class="ctl-lab">Degrees</span></div></div>');
-    setHtml($("howxp"),'XP: 100 per unit. Grade bonus: A +100, B +60, C +30, D +10, Pass +30. 500 XP per level.');
-    setHtml($("wardwrap"),charsHtml());
+    setHtml($("howxp"),""); setHtml($("wardwrap"),"");
   }
 
   // ---- transfer agreements
@@ -990,7 +1074,7 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
   }
 
   function renderTabs(st){
-    if(tab==="xfer"){ setHtml($("tabs"),'<button class="tab backtab" data-tab="all" data-fk="tab:back"><span class="tab-name">← Back to my degrees</span></button>'); return; }
+    if(tab==="xfer"||tab==="settings"){ setHtml($("tabs"),'<button class="tab backtab" data-tab="all" data-fk="tab:back"><span class="tab-name">← Back to my degrees</span></button>'); return; }
     var near=closestId(st);
     var doneCount=ALL.filter(has).length;
     var tkCount=ALL.filter(isTaking).length, rgCount=ALL.filter(isReg).length;
@@ -999,7 +1083,7 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
       '<span class="tab-head"><span class="tab-name">All classes</span></span>'+
       '<span class="tab-sub">Sorted by how many degrees each counts toward</span>'+
       '<span class="tab-num"><b>'+doneCount+'</b> / '+ALL.length+'</span>'+
-      '<span class="dots" aria-hidden="true">'+allDots+'</span>'+
+      '<span class="tbar"><i style="width:'+(ALL.length?Math.round(100*doneCount/ALL.length):0)+'%"></i></span>'+
       '<span class="tab-foot">'+(ALL.length-doneCount)+' not done yet'+(tkCount?' · '+tkCount+' in progress':'')+(rgCount?' · '+rgCount+' registered':'')+'</span></button>';
     DEGS.forEach(function(d){
       var s=st[d.id], complete=s.total>0&&s.got===s.total;
@@ -1008,21 +1092,21 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
         '<span class="tab-head"><span class="tab-name">'+glyph(d.glyph,"req",16)+esc(d.short)+'</span>'+(badge?'<span class="tab-badge">'+badge+'</span>':'')+'</span>'+
         '<span class="tab-sub">'+esc(dName(d))+'</span>'+
         '<span class="tab-num"><b>'+s.got+'</b> / '+s.total+' requirements</span>'+
-        '<span class="dots" aria-hidden="true">'+s.flags.map(function(f){ return '<i class="'+(f===2?"on":(f===1?"half":(f===3?"reg":"")))+'"></i>'; }).join("")+'</span>'+
+        '<span class="tbar"><i style="width:'+(s.total?Math.round(100*s.got/s.total):0)+'%"></i></span>'+
         '<span class="tab-foot">'+(complete?'All requirements met':(s.total-s.got)+' left'+(s.ip||s.rg?' ('+[s.ip?s.ip+' in progress':'',s.rg?s.rg+' registered':''].filter(Boolean).join(", ")+')':''))+' · '+s.units+' of '+d.units[0]+'–'+d.units[1]+' units</span></button>';
     });
     if(!cat.transfers.length){
-      h+='<button class="tab xferpage locked" data-tab="xfer" data-fk="tab:xfer"><span class="tab-head"><span class="tab-name">'+glyph("lock","req",16)+'Transfer to a university</span><span class="tab-badge">Locked</span></span><span class="tab-sub">Upload your bachelor\'s transfer files to unlock this level</span></button>';
+      h+='<button class="tab xferpage locked" data-tab="xfer" data-fk="tab:xfer"><span class="tab-head"><span class="tab-name">'+glyph("lock","req",16)+'Transfer</span><span class="tab-badge">Locked</span></span><span class="tab-sub">Upload your bachelor\'s transfer files to unlock this level</span></button>';
     } else {
       var ts=cat.transfers.map(trStats), nn=ts.reduce(function(x,s){ return x+s.need; },0), mm=ts.reduce(function(x,s){ return x+s.met; },0);
-      h+='<button class="tab xferpage" data-tab="xfer" data-fk="tab:xfer"><span class="tab-head"><span class="tab-name">'+glyph("xfer","req",16)+'Transfer · '+esc(cat.transfers.map(function(a){ return a.short; }).join(", "))+'</span></span><span class="tab-sub">'+esc(cat.transfers.map(function(a){ return a.major; }).join(" · "))+'</span><span class="tab-num"><b>'+mm+'</b> / '+nn+' requirements</span><span class="tab-foot">Open the transfer page</span></button>';
+      h+='<button class="tab xferpage" data-tab="xfer" data-fk="tab:xfer"><span class="tab-head"><span class="tab-name">'+glyph("xfer","req",16)+'Transfer · '+esc(cat.transfers.map(function(a){ return a.short; }).join(", "))+'</span></span><span class="tab-sub">'+esc(cat.transfers.map(function(a){ return a.major; }).join(" · "))+'</span><span class="tab-num"><b>'+mm+'</b> / '+nn+' requirements</span><span class="tbar"><i style="width:'+(nn?Math.round(100*mm/nn):0)+'%"></i></span></button>';
     }
     h+='<button class="tab addtab" data-act="addopen" data-fk="act:addopen"><span class="tab-name">＋ Add</span><span class="tab-sub">A degree or a transfer agreement (PDF or JSON)</span></button>';
     setHtml($("tabs"),h);
   }
 
   function renderHl(){
-    var off=(tab==="xfer"); $("hlbar").hidden=off; $("legend").hidden=off; if(off) return;
+    var off=(tab==="xfer"||tab==="settings"); $("hlbar").hidden=off; $("legend").hidden=off||!legOpen; if(off) return;
     var N=DEGS.length, opts=[["off","Off"]];
     if(N>=2) opts.push(["all","Shared by all "+N]);
     if(N>=3) opts.push(["some","Shared by some"]);
@@ -1030,9 +1114,10 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
     if(cat.transfers.length) opts.push(["transfer","Transfer"]);
     opts.push(["taking","In progress"],["reg","Registered"],["todo","Not done yet"]);
     if(!opts.some(function(o){ return o[0]===hl; })) hl="off";
-    setHtml($("hlbar"),'<span class="lab">Highlight</span>'+opts.map(function(o){
+    var curLab=(opts.filter(function(o){ return o[0]===hl; })[0]||opts[0])[1];
+    setHtml($("hlbar"),'<button class="chip hltog" data-act="hltoggle" data-fk="act:hltoggle" aria-expanded="'+hlOpen+'">Highlight: '+esc(curLab)+(hlOpen?' ▴':' ▾')+'</button><button class="chip hltog" data-act="legtoggle" data-fk="act:legtoggle" aria-expanded="'+legOpen+'">Legend'+(legOpen?' ▴':' ▾')+'</button>'+(hlOpen?opts.map(function(o){
       return '<button class="chip" data-hl="'+o[0]+'" data-fk="hl:'+o[0]+'" aria-pressed="'+(hl===o[0])+'">'+o[1]+'</button>';
-    }).join(""));
+    }).join(""):""));
     var g0=DEGS.length?DEGS[0].glyph:"ring";
     setHtml($("legend"),
       DEGS.map(function(d){ return '<span class="k">'+glyph(d.glyph,"req",16)+esc(d.short)+'</span>'; }).join("")+
@@ -1051,7 +1136,7 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
       var list=ALL.filter(function(c){ return share(c)===k; });
       if(!list.length) continue;
       var title=N===1?"Your classes":(k===N&&N>1?"Counts toward all "+N+" degrees":(k===1?"Counts toward 1 degree":"Counts toward "+k+" degrees"));
-      var sub=(k===N&&N>1)?"Take these first. Each one moves every degree forward.":"";
+      var sub="";
       var d=list.filter(has).length;
       out+='<section class="group"><div class="group-head"><h3>'+title+'</h3><span>'+(sub?sub+' · ':'')+d+' of '+list.length+' done</span></div><div class="list fr">'+list.map(rowHtml).join("")+'</div></section>';
     }
@@ -1080,18 +1165,23 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
 
   var STATUS={loading:"Loading…",saved:"Saved",saving:"Saving…",local:STANDALONE?"Saved on this device":"Saved in this browser only",slow:"Still connecting…",error:"Could not save. Changes show here only."};
   var installEv=null, toolMsg="";
-  function renderTools(){
-    var h='<span class="status'+(status==="error"?" error":"")+'" id="status" role="status">'+STATUS[status]+'</span>';
-    if(confirmReset){
-      h+='<button class="link danger" data-act="reset-yes" data-fk="act:reset-yes">Yes, clear everything</button><button class="link" data-act="reset-no" data-fk="act:reset-no">Cancel</button>';
-    } else {
-      h+='<button class="link" data-act="reset" data-fk="act:reset">Clear all</button>';
-    }
+  function renderSettingsPage(){
+    var h='<div class="setpage"><div class="panel-head"><h2>Settings</h2></div>';
+    h+='<section class="setbox fr"><h3>Your data</h3><div class="fitrow">';
     if(STANDALONE){
       if(installEv) h+='<button class="link" data-act="installapp" data-fk="act:installapp">Install app</button>';
       h+='<button class="link" data-act="export" data-fk="act:export">Backup</button><button class="link" data-act="import" data-fk="act:import">Restore</button>';
-      if(toolMsg) h+='<span class="status" role="status">'+esc(toolMsg)+'</span>';
     }
+    if(confirmReset) h+='<button class="link danger" data-act="reset-yes" data-fk="act:reset-yes">Yes, clear everything</button><button class="link" data-act="reset-no" data-fk="act:reset-no">Cancel</button>';
+    else h+='<button class="link" data-act="reset" data-fk="act:reset">Clear all</button>';
+    h+='</div>'+(toolMsg?'<p class="note" role="status">'+esc(toolMsg)+'</p>':'')+'<p class="note">Everything is saved on this device only.</p></section>';
+    h+='<section class="setbox fr"><h3>Character</h3>'+charsHtml().replace('<div class="chars-wrap"><h4>Character</h4>','<div class="chars-wrap">')+'</section>';
+    h+='<section class="setbox fr"><h3>How XP works</h3><p class="note">100 XP per unit. Grade bonus: A +100, B +60, C +30, D +10, Pass +30. 500 XP per level.</p></section>';
+    return h+'<h3 class="sethead">Degrees</h3></div>';
+  }
+  function renderTools(){
+    var h='<span class="status'+(status==="error"?" error":"")+'" id="status" role="status">'+STATUS[status]+'</span>';
+    h+='<button class="link" data-act="settings" data-fk="act:settings">'+(tab==="settings"?"Settings":"Settings")+'</button>';
     var to=theme==="dark"?"light":"dark";
     h+='<button class="icon-btn" data-act="theme" data-fk="act:theme" aria-label="Switch to '+to+' theme" title="Switch to '+to+' theme"><svg viewBox="0 0 16 16" aria-hidden="true"><circle class="o" cx="8" cy="8" r="6.5"/><path class="h" d="M8 1.5a6.5 6.5 0 0 1 0 13z"/></svg></button>';
     setHtml($("tools"),h);
@@ -1115,7 +1205,7 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
   // Render keeps the page where it is: skips unchanged HTML, restores scroll, never lets focus scroll.
   function render(){
     var y=window.pageYOffset, ae=document.activeElement, fk=ae&&ae.getAttribute?ae.getAttribute("data-fk"):null;
-    if(tab!=="all" && !DEGS.some(function(d){ return d.id===tab; }) && tab!=="xfer") tab="all";
+    if(tab!=="all" && !DEGS.some(function(d){ return d.id===tab; }) && tab!=="xfer"&&tab!=="settings") tab="all";
     var st={}; DEGS.forEach(function(d){ st[d.id]=stats(d); });
     var codes=DEGS.map(function(d){ return d.tag; }).filter(Boolean).slice(0,4).join(" · ");
     var tops=DEGS.map(function(d){ return d.top; }).filter(Boolean).filter(function(v,i,a){ return a.indexOf(v)===i; }).slice(0,2).join(" · ");
@@ -1127,7 +1217,9 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
     var panel=$("panel");
     if(tab==="all") setHtml(panel,renderAllView());
     else if(tab==="xfer"){ setHtml(panel,renderTransferPage()); }
+    else if(tab==="settings"){ setHtml(panel,renderSettingsPage()); }
     else { var d=DEGS.filter(function(x){ return x.id===tab; })[0]; setHtml(panel,renderDegreeView(d,st)+removeBar(d)); }
+    document.body.setAttribute("data-page",tab==="settings"?"settings":"main"); if(tab==="settings") $("mgr").open=true;
     renderMgr();
     if(fk){ var el=document.querySelector('[data-fk="'+fk.replace(/"/g,'\\"')+'"]'); if(el&&el!==document.activeElement){ try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); } } }
     if(Math.abs(window.pageYOffset-y)>1) window.scrollTo(0,y);
@@ -1478,6 +1570,7 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
     else if(ch){ selChar=ch; render(); queueSave(); }
     else if(A("data-addpend")!==null){ addDegree(+A("data-addpend")); }
     else if(A("data-droppend")!==null){ pend.splice(+A("data-droppend"),1); mgrNote=""; renderMgr(); }
+    else if(A("data-rowmenu")!==null){ var rc=A("data-rowmenu"); rowOpen=(rowOpen===rc?"":rc); render(); }
     else if(A("data-xsel")!==null){ xsel=+A("data-xsel"); render(); }
     else if(A("data-del")!==null){ confirmDel=A("data-del"); render(); }
     else if(A("data-delno")!==null){ confirmDel=null; render(); }
@@ -1485,13 +1578,16 @@ a.link.tip:hover{background:var(--ink);color:var(--bg)}
     else if(a==="pickchar"){ $("charfile").click(); }
     else if(a==="rmchar"){ setMine(""); render(); queueSave(); }
     else if(a==="theme"){ toggleTheme(); }
+    else if(a==="settings"){ tab=(tab==="settings"?"all":"settings"); confirmReset=false; render(); window.scrollTo(0,0); }
+    else if(a==="hltoggle"){ hlOpen=!hlOpen; render(); }
+    else if(a==="legtoggle"){ legOpen=!legOpen; render(); }
     else if(a==="export"){ exportBackup(); }
     else if(a==="import"){ $("backupfile").click(); }
     else if(a==="installapp"){ if(installEv){ installEv.prompt(); installEv=null; render(); } }
     else if(a==="reset"){ confirmReset=true; render(); }
     else if(a==="reset-no"){ confirmReset=false; render(); }
     else if(a==="reset-yes"){ confirmReset=false; done={}; taking={}; reg={}; $("panel")._h=null; render(); queueSave(); }
-    else if(a==="addopen"){ var m=$("mgr"); m.open=true; try{ m.scrollIntoView({behavior:"smooth",block:"start"}); }catch(er){ m.scrollIntoView(); } }
+    else if(a==="addopen"){ tab="settings"; render(); var m=$("mgr"); m.open=true; try{ m.scrollIntoView({behavior:"smooth",block:"start"}); }catch(er){ m.scrollIntoView(); } }
     else if(a==="pickpdf"){ $("pdffile").click(); }
     else if(a==="copyprompt"){
       var ta=$("promptbox"), msg=$("copymsg");
