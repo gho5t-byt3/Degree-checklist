@@ -2,7 +2,7 @@
 
 **Free, private, no ads. No accounts, no tracking. Your progress never leaves your device.**
 
-A phone-friendly checklist for college degree requirements. Check off classes once and see how far along every degree is, which classes count toward more than one degree, what is still needed, your XP level and your GPA. It comes with three sample degrees and can load any other degree.
+A phone-friendly checklist for college degree requirements. Check off classes once and see how far along every degree is, which classes count toward more than one degree, what is still needed, your XP level and your GPA. It starts empty. Add your own degree from a catalog PDF, or try the Chaffey College sample degrees.
 
 ## Use it
 
@@ -56,9 +56,12 @@ To undo a mistake, open the degree and press **Remove this degree**.
 - Check off classes once, see progress across every degree
 - Shared-class highlighting, in-progress and registered statuses
 - XP and levels, GPA, a character you can pick or upload
-- Add your own degree from a catalog PDF, pasted text or a JSON file
+- Add one degree or several, from a catalog PDF, pasted text or a JSON file. With several, see which classes count toward more than one
 - Transfer page: load a transfer agreement (for example from ASSIST) to see which of your classes count toward a bachelor's degree. Locked until you add one
-- Backup and Restore your progress as a file
+- A matching icon for each degree, picked automatically (or choose your own)
+- An example degree to show how it works
+- Themes: the original blueprint look plus seven more (Boarding Pass, Amber HUD, Calm Forest, Aurora Glass, Blush Pop, Retro Web, Cyber Mint), each with light and dark. Pick one in Settings; the layout and features stay the same
+- Backup and Restore your progress as a file, with a reminder every two weeks
 
 ## Backups
 
@@ -68,7 +71,7 @@ Progress is stored in your browser on your own device. Clearing website data, de
 
 Your progress, grades, character and added degrees stay in your browser's storage and are never sent anywhere. There is no server and no account. Files you add are read inside your browser and are not uploaded. The app has no ads or analytics.
 
-Two honest notes: GitHub, as the host, can see ordinary web traffic such as visit counts, and the fonts load from Google Fonts. Neither can see anyone's progress.
+Two honest notes: GitHub, as the host, can see ordinary web traffic such as visit counts, and the fonts load from Google Fonts (a theme's extra fonts load only if you pick that theme). Neither can see anyone's progress.
 
 ## Heads up
 
