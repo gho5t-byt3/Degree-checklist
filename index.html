@@ -650,6 +650,7 @@ img,svg{max-width:100%}
 
   <footer class="support">
     <p class="note">No accounts, no tracking, no ads. Your progress never leaves your device.</p>
+    <p class="note"><a class="link tip" id="about" href="https://github.com/gho5t-byt3/Degree-checklist#readme" target="_blank" rel="noopener noreferrer">About / README</a></p>
     <div id="tipbox" hidden><p class="note">Free and private. Tips keep it going.</p><a class="link tip" id="tip" href="#" target="_blank" rel="noopener noreferrer">Support</a></div>
   </footer>
 
@@ -1303,6 +1304,7 @@ img,svg{max-width:100%}
       return '<button class="skinbtn" data-skin="'+k.id+'" data-fk="skin:'+(k.id||"orig")+'" aria-pressed="'+(skin===k.id)+'"><span class="sw">'+sw+'</span><b>'+esc(k.name)+'</b></button>';
     }).join("")+'</div></section>';
     h+='<section class="setbox fr"><h3>Character</h3>'+charsHtml().replace('<div class="chars-wrap"><h4>Character</h4>','<div class="chars-wrap">')+'</section>';
+    h+='<section class="setbox fr"><h3>About</h3><p class="note">How it works, how to add a degree, and privacy details.</p><div class="fitrow"><a class="link tip" href="https://github.com/gho5t-byt3/Degree-checklist#readme" target="_blank" rel="noopener noreferrer">About / README</a></div></section>';
     h+='<section class="setbox fr"><h3>How XP works</h3><p class="note">100 XP per unit. Grade bonus: A +100, B +60, C +30, D +10, Pass +30. 500 XP per level.</p></section>';
     return h+'<h3 class="sethead">Degrees</h3></div>';
   }
