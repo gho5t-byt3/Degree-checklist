@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="15">
+<rect width="900" height="360" fill="#EEF0F2"/>
+<g fill="none" stroke="#111" stroke-width="2">
+<rect x="30" y="40" width="240" height="290" rx="4" stroke-dasharray="6 5"/>
+<rect x="330" y="40" width="240" height="290" rx="4" stroke-dasharray="6 5"/>
+<rect x="630" y="40" width="240" height="290" rx="4" stroke-dasharray="6 5"/>
+<path d="M280 185h40m-10-9 10 9-10 9M580 185h40m-10-9 10 9-10 9"/>
+</g>
+<g fill="#111">
+<text x="30" y="26" font-weight="700">1  DEGREES</text><text x="330" y="26" font-weight="700">2  PREVIEW</text><text x="630" y="26" font-weight="700">3  ADDED</text>
+</g>
+<!-- panel 1 -->
+<g fill="none" stroke="#111" stroke-width="2">
+<rect x="50" y="70" width="200" height="52" rx="26"/><rect x="50" y="140" width="200" height="40"/>
+<path d="M62 215h176M62 235h140M62 255h160" stroke="#888" stroke-dasharray="3 4"/>
+</g>
+<text x="150" y="102" text-anchor="middle" fill="#111">Choose PDF</text>
+<text x="150" y="166" text-anchor="middle" fill="#555" font-size="13">+ Add</text>
+<text x="150" y="300" text-anchor="middle" fill="#555" font-size="13">tap, pick your file</text>
+<!-- panel 2 -->
+<g fill="none" stroke="#111" stroke-width="2"><rect x="350" y="64" width="200" height="190"/><rect x="364" y="266" width="172" height="40" rx="20" fill="#111"/></g>
+<g fill="#111" font-size="13"><text x="364" y="90" font-weight="700">Networking Specialist</text><text x="364" y="112" fill="#555">A.S. · 40 units</text>
+<text x="364" y="140">- ITIS 10</text><text x="364" y="160">- ITIS 14</text><text x="364" y="180">- ITIS 51</text><text x="364" y="200">- ...</text>
+<text x="364" y="238" fill="#555">check against catalog</text></g>
+<text x="450" y="291" text-anchor="middle" fill="#EEF0F2">Add</text>
+<!-- panel 3 -->
+<g fill="none" stroke="#111" stroke-width="2"><rect x="650" y="70" width="200" height="56"/><rect x="650" y="138" width="200" height="56" stroke-dasharray="4 4" stroke="#888"/></g>
+<g fill="#111"><circle cx="672" cy="98" r="12"/><text x="694" y="94" font-size="13" font-weight="700">New degree</text><text x="694" y="112" font-size="12" fill="#555">0 of 8 done</text></g>
+<path d="M666 98l4 5 8-9" fill="none" stroke="#EEF0F2" stroke-width="2.5"/>
+<text x="750" y="272" text-anchor="middle" fill="#555" font-size="13">shows up as a new tab</text>
+</svg>
