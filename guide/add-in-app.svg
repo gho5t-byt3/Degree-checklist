@@ -14,7 +14,7 @@
 <rect x="50" y="70" width="200" height="52" rx="26"/><rect x="50" y="140" width="200" height="40"/>
 <path d="M62 215h176M62 235h140M62 255h160" stroke="#888" stroke-dasharray="3 4"/>
 </g>
-<text x="150" y="102" text-anchor="middle" fill="#111">Choose PDF</text>
+<text x="150" y="102" text-anchor="middle" fill="#111">Choose file</text>
 <text x="150" y="166" text-anchor="middle" fill="#555" font-size="13">+ Add</text>
 <text x="150" y="300" text-anchor="middle" fill="#555" font-size="13">tap, pick your file</text>
 <!-- panel 2 -->

@@ -12,6 +12,6 @@
 <text x="105" y="120" text-anchor="middle">catalog.pdf</text><text x="105" y="170" text-anchor="middle" fill="#555">+ Copy prompt</text>
 <text x="355" y="100" text-anchor="middle">paste prompt</text><text x="355" y="124" text-anchor="middle">attach PDF</text><text x="355" y="168" text-anchor="middle" fill="#555">AI replies</text><text x="355" y="188" text-anchor="middle" fill="#555">with { JSON }</text>
 <text x="585" y="158" text-anchor="middle" font-weight="700">.json</text><text x="585" y="236" text-anchor="middle" fill="#555">or paste in box</text>
-<text x="795" y="110" text-anchor="middle">Choose PDF</text><text x="795" y="130" text-anchor="middle">or JSON</text><text x="795" y="176" text-anchor="middle" fill="#555">check preview</text><text x="795" y="198" text-anchor="middle" fill="#555">then Add</text>
+<text x="795" y="110" text-anchor="middle">Choose file</text><text x="795" y="130" text-anchor="middle">JSON file</text><text x="795" y="176" text-anchor="middle" fill="#555">check preview</text><text x="795" y="198" text-anchor="middle" fill="#555">then Add</text>
 </g>
 </svg>

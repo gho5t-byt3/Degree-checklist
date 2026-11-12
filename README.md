@@ -41,13 +41,17 @@ These steps use Chaffey College as the example. Other colleges are similar. Look
 
 <img src="guide/catalog-6.jpg" alt="Degree page with Export Page as PDF highlighted" width="520">
 
-**7. Add it to the app.** Open **Settings** at the top of the app (or tap the **＋ Add** tab), find the **Degrees** section, and choose the PDF. Check the preview against the catalog page, then press **Add**.
+**7. Have an AI make your file (recommended).** This works for any college. In the app, open **Settings**, find the **Degrees** section and press **Copy prompt**. Paste it into an AI chat together with your PDF, then save the reply as a `.json` file (or copy the reply to paste into the app).
 
-<img src="guide/add-in-app.svg" alt="Steps in the app: choose the PDF, check the preview, press Add, and the degree appears as a new tab" width="640">
+<img src="guide/ai-route.svg" alt="AI route: copy the prompt, paste it into an AI chat with your PDF, save the JSON reply, then add it in the app" width="640">
 
-**If the preview looks wrong,** use the AI route instead. In the app, press **Copy prompt**, paste it into an AI chat together with your PDF, and save the reply as a `.json` file (or paste it into the box in the app). Then upload that JSON file the same way. AI can make mistakes, so always check the list against your catalog.
+**8. Add the file.** In **Settings**, choose the JSON file (or paste the reply). Check the preview against your catalog: the number of classes, the total units and any pick-one choices. Then press **Add**.
 
-<img src="guide/ai-route.svg" alt="AI route: copy the prompt, paste it into an AI chat with your PDF, save the JSON reply, then upload it in the app" width="640">
+<img src="guide/add-in-app.svg" alt="Steps in the app: choose the file, check the preview, press Add, and the degree appears as a new tab" width="640">
+
+AI can make mistakes, so always check the list against your catalog.
+
+**Quick option:** you can add a catalog PDF straight into the app (under Settings, Degrees). It was built for Chaffey College's catalog layout and can miss or misread classes for other colleges and majors, so use the AI steps unless you are sure.
 
 To undo a mistake, open the degree and press **Remove this degree**.
 
