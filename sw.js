@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION whenever you change files so phones pick up the update.
-var VERSION = "degree-checklist-v21";
+var VERSION = "degree-checklist-v22";
 var CORE = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon.png"];
 var EXTERNAL = ["fonts.googleapis.com", "fonts.gstatic.com", "cdnjs.cloudflare.com"];
 

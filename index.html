@@ -1116,8 +1116,8 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     var doneBtn='<button class="rowmore" data-rowmenu="'+esc(c)+'" data-fk="rm:'+esc(c)+'" aria-label="Close status options">Done</button>';
     var more='<button class="rowmore" data-rowmenu="'+esc(c)+'" data-fk="rm:'+esc(c)+'" aria-label="Status options for '+esc(c)+'" title="Status and prerequisites">⋯</button>';
     var meta;
-    if(isDone) meta=gradeSelect(c,done[c])+(isX?'<button class="rowmore" data-pr="'+esc(c)+'" data-fk="pr:'+esc(c)+'" aria-label="Options for '+esc(c)+'" title="Remove or edit this class">⋯</button>':'');
-    else if(rowOpen===c) meta=(lk.length?"":ipBtn(c)+rgBtn(c))+prBtn+doneBtn;
+    if(isDone) meta=gradeSelect(c,done[c])+(isX?'<button class="rowmore" data-xdel="'+esc(c)+'" data-fk="xdelrow:'+esc(c)+'" aria-label="Remove '+esc(c)+'">Remove</button><button class="rowmore" data-pr="'+esc(c)+'" data-fk="pr:'+esc(c)+'" aria-label="Prerequisites for '+esc(c)+'">Prereqs</button>':'');
+    else if(rowOpen===c) meta=(lk.length?"":ipBtn(c)+rgBtn(c))+prBtn+(isX?'<button class="rowmore" data-xdel="'+esc(c)+'" data-fk="xdelrow:'+esc(c)+'">Remove</button>':'')+doneBtn;
     else meta=(lk.length?'<button class="rowmore unl" data-unlock="'+esc(c)+'" data-fk="unlock:'+esc(c)+'" title="Waived it or have an equivalent? Unlock anyway">Unlock anyway</button>':(isTaking(c)?'<span class="stag">In progress</span>':(isReg(c)?'<span class="stag">Registered</span>':(pre.length&&ent&&ent.w&&pre.some(function(p){ return !metReq(p); })?'<span class="stag">Prereq waived</span>':''))))+more;
     var badge=sh?'<span class="share s'+Math.min(sh,3)+'" aria-label="Counts toward '+sh+(sh===1?' degree':' degrees')+'" title="Counts toward '+sh+(sh===1?' degree':' degrees')+'">×'+sh+'</span>':(isX?'<span class="share s0" title="A class you added, not part of a degree">added</span>':'<span class="share s0" title="Not part of your degrees, only for transfer">transfer only</span>');
     return '<div class="'+cls+'">'+
@@ -1939,7 +1939,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     else if(A("data-relock")!==null){ var rc=A("data-relock"); setPrereq(rc,function(e){ e.w=false; }); $("panel")._h=null; render(); queueSave(); }
     else if(A("data-xopen")!==null){ xOpen=A("data-xopen"); $("panel")._h=null; render(); var xc=$("xcode"); if(xc) try{ xc.focus(); }catch(er){} }
     else if(A("data-xadd")!==null){ addExtra(A("data-xadd")); }
-    else if(A("data-xdel")!==null){ xdelAsk=A("data-xdel"); $("panel")._h=null; render(); }
+    else if(A("data-xdel")!==null){ xdelAsk=A("data-xdel"); prOpen=xdelAsk; xOpen=""; $("panel")._h=null; render(); }
     else if(A("data-xdelno")!==null){ xdelAsk=""; $("panel")._h=null; render(); }
     else if(A("data-xdelyes")!==null){ removeExtra(A("data-xdelyes")); }
     else if(a==="guide"){ tab="guide"; render(); window.scrollTo(0,0); }
