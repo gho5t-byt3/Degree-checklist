@@ -41,7 +41,7 @@ These steps use Chaffey College as the example. Other colleges are similar. Look
 
 <img src="guide/catalog-6.jpg" alt="Degree page with Export Page as PDF highlighted" width="520">
 
-**7. Have an AI make your file (recommended).** This works for any college. In the app, open **Settings**, find the **Degrees** section and press **Copy prompt**. Paste it into an AI chat together with your PDF, then save the reply as a `.json` file (or copy the reply to paste into the app).
+**7. Have an AI make your file (recommended).** This works for any college. In the app, open **Settings**, find the **Degrees** section and press **Copy prompt**. Paste it into an AI chat together with your PDF, the AI will give you a `.json` file to download, or show the code in a box. If you only get code, use the copy button on the code box and paste it into the app.
 
 <img src="guide/ai-route.svg" alt="AI route: copy the prompt, paste it into an AI chat with your PDF, save the JSON reply, then add it in the app" width="640">
 

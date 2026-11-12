@@ -650,7 +650,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     <div class="mgr-body">
       <p class="note">Best way to add a degree: have an AI turn your catalog page into a small file, then add that file here. Files are read inside your browser and are not uploaded by this app. Always check the preview against your catalog before pressing Add.</p>
       <details class="paste" open><summary>Step 1: Get the file from an AI (recommended)</summary>
-        <p class="note">Copy this prompt, paste it into any AI chat together with your catalog page (text or PDF), then save its reply as a .json file, or paste the reply into the box below.</p>
+        <p class="note">Copy this prompt, paste it into any AI chat together with your catalog page (text or PDF), the AI will give you a .json file to download, or show the code in a box. If you get a file, use Step 2. If you only get code, tap the copy button on the code box and paste it below.</p>
         <textarea id="promptbox" rows="6" readonly aria-label="Prompt for an AI"></textarea>
         <div class="fitrow"><button class="link" data-act="copyprompt">Copy prompt</button><span class="note" id="copymsg" role="status"></span></div>
       </details>
@@ -1324,7 +1324,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
       step(5,'Find your major','Click the degree you want.',4)+
       step(6,'Export the page as a PDF','Click Export Page as PDF at the top right and save the file where you can find it.',5)+
       '</ol></section>';
-    h+='<section class="setbox fr"><h3>3. Have an AI make your file</h3><p>This is the most reliable way, and it works for any college. Copy the prompt, paste it into an AI chat together with your PDF, then save the reply as a .json file (or copy the reply to paste into the app).</p><img class="gimg" src="'+GUIDE_SVG[1]+'" alt="Copy the prompt, paste it into an AI chat with your PDF, save the JSON reply, then add it in the app"><div class="fitrow"><button class="link" data-act="guidecopy" data-fk="act:guidecopy">Copy prompt</button></div><p class="note" id="gcopymsg" aria-live="polite"></p></section>';
+    h+='<section class="setbox fr"><h3>3. Have an AI make your file</h3><p>This is the most reliable way, and it works for any college. Copy the prompt, paste it into an AI chat together with your PDF, the AI will either give you a .json file to download or show the code in a box. If you get a file, add it in the next step. If you only get code, use the copy button on the code box and paste it into the app instead.</p><img class="gimg" src="'+GUIDE_SVG[1]+'" alt="Copy the prompt, paste it into an AI chat with your PDF, save the JSON reply, then add it in the app"><div class="fitrow"><button class="link" data-act="guidecopy" data-fk="act:guidecopy">Copy prompt</button></div><p class="note" id="gcopymsg" aria-live="polite"></p></section>';
     h+='<section class="setbox fr"><h3>4. Add it to the app</h3><p>Open Settings, find the Degrees section, and choose the file the AI gave you (or paste its reply). A preview appears. Your degree is added as a new tab when you press Add.</p><img class="gimg" src="'+GUIDE_SVG[0]+'" alt="Choose the file, check the preview, press Add, and the degree appears as a new tab"><div class="fitrow"><button class="link" data-act="settings" data-fk="act:guidesettings">Open Settings</button></div></section>';
     h+='<section class="setbox fr"><h3>5. Check it before you rely on it</h3><p>AI and PDF readers can make mistakes. Before pressing Add, compare the preview with your catalog page:</p><ul class="gcheck"><li>Is the number of classes right?</li><li>Does the total units match the catalog?</li><li>Are the &ldquo;choose one&rdquo; options there?</li><li>Are any classes missing or doubled?</li></ul><p>If something is off, fix it by asking the AI to correct it and add the new file again. Adding it again replaces the old copy.</p><p class="note">Quick option: you can add a catalog PDF straight into the app from Settings. It was built for Chaffey&rsquo;s layout and can be wrong for other colleges and majors, so use the AI steps unless you are sure.</p></section>';
     h+='<section class="setbox fr"><h3>Optional: transfer plans</h3><p>Planning to transfer? Download your transfer agreement as a PDF (for example from ASSIST) and add it on the Transfer page. It shows which of your classes count toward the bachelor&rsquo;s degree.</p></section>';
@@ -1548,7 +1548,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
 
   // ---- JSON import (also what an AI produces from any catalog page, see PROMPT)
   var PROMPT=[
-"I use a degree checklist app. Read the degree program page I give you (pasted text or attached PDF) and reply with ONLY one JSON object, no explanation and no markdown fences, in exactly this shape:",
+"I use a degree checklist app. Read the degree program page I give you (pasted text or attached PDF) and turn it into one JSON object in exactly this shape. If you can create files, save it as a downloadable file named degree.json and give me the download link. If you cannot create files, reply with ONLY the JSON in a single code block, with no other text:",
 "",
 "{",
 '  "name": "Degree name without the degree type, e.g. Cybersecurity Professional",',
@@ -1629,11 +1629,24 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     var uni=String(o.university||o.uni||"").trim();
     return {kind:"transfer",name:major,major:major,uni:uni,from:String(o.from||""),year:String(o.year||""),short:String(o.short||(uni?uniShort(uni):"Transfer")),groups:groups};
   }
+  function extractJson(text){
+    var t=String(text).replace(/[\u201C\u201D\u201E]/g,'"').replace(/[\u2018\u2019]/g,"'").replace(/```(?:json)?/gi,"").replace(/\u00A0/g," ");
+    var i=t.search(/[\[{]/);
+    if(i<0) throw new Error("no JSON found. Paste the whole reply from the AI.");
+    var depth=0, inStr=false, esc=false, end=-1;
+    for(var k=i;k<t.length;k++){
+      var c=t.charAt(k);
+      if(inStr){ if(esc) esc=false; else if(c==="\\") esc=true; else if(c==='"') inStr=false; continue; }
+      if(c==='"'){ inStr=true; continue; }
+      if(c==="{"||c==="[") depth++;
+      else if(c==="}"||c==="]"){ depth--; if(depth===0){ end=k; break; } }
+    }
+    if(end<0) throw new Error("the JSON looks cut off. Copy the whole reply, including the last }.");
+    return t.slice(i,end+1).replace(/,(\s*[}\]])/g,"$1");
+  }
   function queueJson(name,text){
     try{
-      var t=String(text).replace(/```(?:json)?/gi,"").trim(), i=t.search(/[\[{]/);
-      if(i<0) throw new Error("no JSON found.");
-      var o=JSON.parse(t.slice(i)), list=Array.isArray(o)?o:(o&&Array.isArray(o.degrees)?o.degrees:[o]);
+      var o=JSON.parse(extractJson(text)), list=Array.isArray(o)?o:(o&&Array.isArray(o.degrees)?o.degrees:[o]);
       list.forEach(function(x,k){
         if(x&&x.kind==="transfer"){ var a=fromTransferJson(x,list.length>1?k:undefined); a.fileName=name; pend.push(a); return; }
         var r=fromJson(x,list.length>1?k:undefined); r.fileName=name; r.sumMin=minUnits(r); pend.push(r);
@@ -1666,7 +1679,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
         mgrNote=f.name+": "+(e&&e.message?e.message:"could not be read")+". Try pasting the text instead.";
       });
     });
-    chain.then(function(){ if(pend.length&&mgrNote.indexOf("Reading")===0) mgrNote=""; renderMgr(); });
+    chain.then(function(){ if(pend.length&&mgrNote.indexOf("Reading")===0) mgrNote=""; renderMgr(); showMgrOut(); });
   }
   function addTransfer(i){
     var r=pend[i]; if(!r) return;
@@ -1705,6 +1718,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     confirmDel=null; mgrNote="Degree removed. Your checked classes are kept in case you add it back.";
     render(); queueSave();
   }
+  function showMgrOut(){ try{ var mo=$("mgrout"); if(mo&&(pend.length||mgrNote)) mo.scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){} }
   function renderMgr(){
     var h="";
     if(mgrNote) h+='<p class="note">'+esc(mgrNote)+'</p>';
@@ -1836,8 +1850,10 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     else if(a==="readpaste"){
       var txt=$("pastebox").value;
       if(!txt.trim()){ mgrNote="Paste the program page text first."; renderMgr(); return; }
-      mgrNote=""; if(/^\s*(```|\{|\[)/.test(txt)||(/"sections"/.test(txt)&&/"courses"/.test(txt))) queueJson("Pasted JSON",txt); else queueParsed("Pasted text",txt.split(/\r?\n/));
-      renderMgr();
+      mgrNote=""; var n0=pend.length;
+      if(/^\s*(json\s*)?(```|\{|\[)/i.test(txt)||(/"sections"/.test(txt)&&/"courses"/.test(txt))) queueJson("Pasted JSON",txt); else queueParsed("Pasted text",txt.split(/\r?\n/));
+      if(pend.length>n0){ $("pastebox").value=""; if(!mgrNote) mgrNote="Read it. Check the preview below, then press Add."; }
+      renderMgr(); showMgrOut();
     }
     else if(a==="defaults"){ cat=JSON.parse(DEFAULT_STR); rebuild(); mgrNote="Chaffey sample degrees added."; render(); queueSave(); }
   });
