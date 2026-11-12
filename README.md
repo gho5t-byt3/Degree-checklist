@@ -58,6 +58,8 @@ To undo a mistake, open the degree and press **Remove this degree**.
 ## Features
 
 - A built-in Get started guide with pictures, on the welcome screen and in Settings, so you don't need this page
+- Prerequisites: mark what a class needs first. It stays locked until the prerequisite is done, in progress or registered, and you can unlock it anyway if it was waived
+- My added classes: add classes that are not in your degrees (extra classes or prerequisites). They count toward XP and units
 - Check off classes once, see progress across every degree
 - Shared-class highlighting, in-progress and registered statuses
 - XP and levels, GPA, a character you can pick or upload

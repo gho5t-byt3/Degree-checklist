@@ -553,6 +553,23 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
 .gimg.narrow{max-width:240px}
 .gfoot{justify-content:center;margin:8px 0 24px}
 .gcheck{margin:6px 0 10px 18px;padding:0;line-height:1.6}
+/* prerequisites + added classes */
+.row.locked{opacity:.78}
+.row.locked .lbl input{opacity:.45;cursor:not-allowed}
+.row.locked .code,.row.locked .ttl{color:var(--mid)}
+.pre{display:flex;align-items:center;gap:5px;font-size:10.5px;letter-spacing:.04em;color:var(--mid);margin-top:2px;flex-wrap:wrap}
+.pre svg{flex:none}
+.rowmore.unl{min-height:34px}
+.preq,.xform{margin:0;padding:12px 14px;border:1px dashed var(--line);background:var(--soft);display:grid;gap:8px}
+.xform{margin-top:8px}
+.xform label{display:grid;gap:3px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mid)}
+.xform input,.preq select{min-height:40px;padding:0 10px;font:inherit;font-size:13px;color:var(--ink);background:var(--panel);border:1px solid var(--ink);border-radius:var(--rad,0);width:100%;max-width:100%}
+.preq select{flex:1;min-width:0}
+.prchips{display:flex;flex-wrap:wrap;gap:6px}
+.prchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ink);padding:2px 4px 2px 10px;font-size:12px;border-radius:999px}
+.prchip button{background:transparent;border:0;color:var(--mid);min-width:30px;min-height:30px;cursor:pointer;font-size:13px}
+.xempty{padding:10px 12px;margin:0}
+.xaddrow{margin-top:8px}
 
 /* skins: original blueprint = no data-skin attribute */
 :root[data-skin="ticket"][data-theme="light"]{--bg:#E7DFC8;--panel:#F4EEDC;--ink:#2A2C32;--mid:#5F5A4C;--faint:#A8A18E;--line:#B9B19B;--soft:#DDD4BA;--hit:#D3C9AC;--warn:#9A4A00;--accent:#C8321F;--onaccent:#FBF3E0;--tr:#2B6F7A;--trt:#2B6F7A;--display:'Barlow Condensed','Arial Narrow',sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--rad:2px;--bw:1.5px}
@@ -924,7 +941,8 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
 
   // ---- catalog state (degrees + courses), rebuilt whenever it changes
   var cat=JSON.parse(DEFAULT_STR);
-  var DEGS=[], COURSES={}, roles={}, ALL=[], DEPT={}, TCOURSES={}, TR={};
+  var DEGS=[], COURSES={}, roles={}, ALL=[], EXTRA=[], DEPT={}, TCOURSES={}, TR={};
+  var prOpen="", xOpen="", xdelAsk="";
   function setRole(code,id,r){ if(!roles[code]) roles[code]={}; roles[code][id]=r; }
   function cmp(a,b){
     var da=DEPT[a.split(" ")[0]],db=DEPT[b.split(" ")[0]];
@@ -946,10 +964,35 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
       });
     });
     ALL=Object.keys(roles); ALL.sort(cmp);
+    EXTRA=(Array.isArray(cat.extra)?cat.extra:[]).filter(function(c,i,a){ return COURSES[c]&&!roles[c]&&a.indexOf(c)===i; });
     TCOURSES={}; TR={}; if(!Array.isArray(cat.transfers)) cat.transfers=[];
     cat.transfers.forEach(function(a){ a.groups.forEach(function(g){ g.rows.forEach(function(r){ (r.cc||[]).forEach(function(c){
       TCOURSES[c.code]=[c.title,c.units]; if(!TR[c.code]) TR[c.code]=[]; if(TR[c.code].indexOf(a.short)<0) TR[c.code].push(a.short);
     }); }); }); });
+  }
+  function mkCat(degs,courses,transfers){
+    var n={degs:degs,courses:courses,transfers:transfers};
+    if(cat.extra&&cat.extra.length) n.extra=cat.extra;
+    if(cat.prereqs&&Object.keys(cat.prereqs).length) n.prereqs=cat.prereqs;
+    return n;
+  }
+  function known(c){ return !!(COURSES[c]||TCOURSES[c]); }
+  function reqs(c){ var e=cat.prereqs&&cat.prereqs[c]; return e&&Array.isArray(e.n)?e.n.filter(known):[]; }
+  function metReq(p){ return done[p]!==undefined||taking[p]===true||reg[p]===true; }
+  function lockedBy(c){
+    if(done[c]!==undefined||taking[c]===true||reg[c]===true) return [];
+    var e=cat.prereqs&&cat.prereqs[c]; if(e&&e.w) return [];
+    return reqs(c).filter(function(p){ return !metReq(p); });
+  }
+  function dependsOn(p,c,seen){
+    seen=seen||{}; if(p===c) return true; if(seen[p]) return false; seen[p]=true;
+    return reqs(p).some(function(q){ return dependsOn(q,c,seen); });
+  }
+  function setPrereq(c,fn){
+    if(!cat.prereqs) cat.prereqs={};
+    var e=cat.prereqs[c]||{n:[],w:false}; fn(e);
+    if(!e.n.length) delete cat.prereqs[c]; else cat.prereqs[c]=e;
+    if(!Object.keys(cat.prereqs).length) delete cat.prereqs;
   }
   function ct(c){ return COURSES[c]||TCOURSES[c]||[c,0]; }
   function dName(d){ var t=d.type===undefined?"A.S.":d.type; return d.name+(t?" "+t:""); }
@@ -957,6 +1000,8 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
   function validCat(c){
     try{
       if(!c||!Array.isArray(c.degs)||typeof c.courses!=="object") return false;
+      if(c.extra!==undefined&&!(Array.isArray(c.extra)&&c.extra.every(function(x){ return typeof x==="string"&&c.courses[x]; }))) return false;
+      if(c.prereqs!==undefined&&!(c.prereqs&&typeof c.prereqs==="object"&&Object.keys(c.prereqs).every(function(k){ var v=c.prereqs[k]; return v&&Array.isArray(v.n)&&v.n.every(function(s){ return typeof s==="string"; }); }))) return false;
       if(c.transfers!==undefined&&!(Array.isArray(c.transfers)&&c.transfers.every(function(a){ return a&&typeof a.short==="string"&&typeof a.id==="string"&&Array.isArray(a.groups)&&a.groups.every(function(g){ return Array.isArray(g.rows)&&g.rows.every(function(r){ return r&&r.u&&typeof r.u.code==="string"&&Array.isArray(r.cc)&&r.cc.every(function(x){ return x&&typeof x.code==="string"&&typeof x.title==="string"&&typeof x.units==="number"; }); }); }); }))) return false;
       return c.degs.every(function(d){
         return d&&typeof d.id==="string"&&typeof d.name==="string"&&Array.isArray(d.sections)&&d.sections.every(function(s){
@@ -991,7 +1036,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
 
   function player(){
     var xp=0,units=0,n=0,pts=0,gu=0,tn=0,rn=0,anyA=false;
-    ALL.forEach(function(c){
+    ALL.concat(EXTRA).forEach(function(c){
       if(!has(c)){ if(isTaking(c)) tn++; else if(isReg(c)) rn++; return; }
       var u=COURSES[c][1], g=done[c];
       n++; units+=u; xp+=u*XP_PER_UNIT+(BONUS[g]||0);
@@ -1036,18 +1081,53 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     var on=isReg(c);
     return '<button class="rgbtn'+(on?" on":"")+'" data-rg="'+esc(c)+'" data-fk="rg:'+esc(c)+'" aria-pressed="'+on+'" title="Registered for next semester" aria-label="Mark '+esc(c)+' as registered for next semester">Registered</button>';
   }
+  function preLine(c,lk){
+    var p=reqs(c); if(!p.length) return "";
+    return '<span class="pre">'+(lk.length?glyph("lock","req",11)+' Locked. Needs ':'Prereq: ')+p.map(function(q){ return esc(q)+(has(q)?" ✓":(isTaking(q)?" (in progress)":(isReg(q)?" (registered)":""))); }).join(", ")+'</span>';
+  }
+  function xform(f){
+    return '<div class="xform fr"><b>'+(f==="*"?"Add a class":"Add a new class as a prerequisite of "+esc(f))+'</b>'+
+      '<label>Class code<input id="xcode" maxlength="20" placeholder="MATH 10" autocomplete="off" autocapitalize="characters"></label>'+
+      '<label>Title<input id="xtitle" maxlength="80" placeholder="Intermediate Algebra" autocomplete="off"></label>'+
+      '<label>Units<input id="xunits" type="number" min="0" max="12" step="0.5" value="3" inputmode="decimal"></label>'+
+      '<p class="note" id="xmsg" role="status"></p><div class="fitrow"><button class="link" data-xadd="'+esc(f)+'" data-fk="xadd">Add class</button><button class="chip" data-xopen="" data-fk="xcancel">Cancel</button></div></div>';
+  }
+  function preqPanel(c){
+    var cur=reqs(c), isX=EXTRA.indexOf(c)>=0, lk=lockedBy(c), e=cat.prereqs&&cat.prereqs[c];
+    var pool=ALL.concat(EXTRA); Object.keys(TCOURSES).forEach(function(k){ if(pool.indexOf(k)<0) pool.push(k); });
+    var opts=pool.filter(function(p){ return p!==c&&cur.indexOf(p)<0&&!dependsOn(p,c); });
+    var h='<div class="preq fr"><b>Prerequisites for '+esc(c)+'</b>';
+    h+=cur.length?'<div class="prchips">'+cur.map(function(p){ return '<span class="prchip">'+esc(p)+(has(p)?" ✓":"")+'<button data-prdel="'+esc(c)+'|'+esc(p)+'" data-fk="prdel:'+esc(c)+':'+esc(p)+'" aria-label="Remove prerequisite '+esc(p)+'">✕</button></span>'; }).join("")+'</div>':'<p class="note">None yet. Pick a class this one needs first.</p>';
+    h+='<div class="fitrow"><select id="prsel" aria-label="Pick a prerequisite"><option value="">Pick a class…</option>'+opts.map(function(p){ return '<option value="'+esc(p)+'">'+esc(p)+' · '+esc(ct(p)[0])+'</option>'; }).join("")+'</select><button class="link" data-pradd="'+esc(c)+'" data-fk="pradd">Add</button></div>';
+    h+='<div class="fitrow"><button class="chip" data-xopen="'+esc(c)+'" data-fk="xopen:'+esc(c)+'">Not listed? Add a new class</button></div>';
+    if(xOpen===c) h+=xform(c);
+    if(cur.length){
+      if(e&&e.w) h+='<p class="note">Prerequisite waived, so this class is unlocked.</p><div class="fitrow"><button class="chip" data-relock="'+esc(c)+'" data-fk="relock">Lock again</button></div>';
+      else if(lk.length) h+='<p class="note">Waived it or already have an equivalent? You can unlock this class anyway.</p><div class="fitrow"><button class="chip" data-unlock="'+esc(c)+'" data-fk="unlock:'+esc(c)+'">Unlock anyway</button></div>';
+    }
+    if(isX) h+='<div class="fitrow">'+(xdelAsk===c?'<button class="chip danger" data-xdelyes="'+esc(c)+'" data-fk="xdelyes">Yes, remove this class</button><button class="chip" data-xdelno="1" data-fk="xdelno">Cancel</button>':'<button class="chip" data-xdel="'+esc(c)+'" data-fk="xdel:'+esc(c)+'">Remove this class</button>')+'</div>';
+    return h+'<div class="fitrow"><button class="link" data-pr="'+esc(c)+'" data-fk="prclose">Close</button></div></div>';
+  }
   function rowHtml(c){
     var t=ct(c)[0], u=ct(c)[1], isDone=has(c), sh=share(c), trh=(hl==="transfer"&&TR[c]);
-    var cls="row"+(isDone?" done":(isTaking(c)?" taking":(isReg(c)?" reg":"")))+(hl==="off"?"":(match(c)?" hit":" dim"))+(trh?" trhit":"");
+    var lk=lockedBy(c), isX=EXTRA.indexOf(c)>=0, pre=reqs(c), ent=cat.prereqs&&cat.prereqs[c];
+    var cls="row"+(isDone?" done":(isTaking(c)?" taking":(isReg(c)?" reg":"")))+(lk.length?" locked":"")+(hl==="off"?"":(match(c)?" hit":" dim"))+(trh?" trhit":"");
+    var prBtn='<button class="rowmore" data-pr="'+esc(c)+'" data-fk="pr:'+esc(c)+'" aria-pressed="'+(prOpen===c)+'">Prereqs'+(pre.length?" ("+pre.length+")":"")+'</button>';
+    var doneBtn='<button class="rowmore" data-rowmenu="'+esc(c)+'" data-fk="rm:'+esc(c)+'" aria-label="Close status options">Done</button>';
+    var more='<button class="rowmore" data-rowmenu="'+esc(c)+'" data-fk="rm:'+esc(c)+'" aria-label="Status options for '+esc(c)+'" title="Status and prerequisites">⋯</button>';
+    var meta;
+    if(isDone) meta=gradeSelect(c,done[c])+(isX?'<button class="rowmore" data-pr="'+esc(c)+'" data-fk="pr:'+esc(c)+'" aria-label="Options for '+esc(c)+'" title="Remove or edit this class">⋯</button>':'');
+    else if(rowOpen===c) meta=(lk.length?"":ipBtn(c)+rgBtn(c))+prBtn+doneBtn;
+    else meta=(lk.length?'<button class="rowmore unl" data-unlock="'+esc(c)+'" data-fk="unlock:'+esc(c)+'" title="Waived it or have an equivalent? Unlock anyway">Unlock anyway</button>':(isTaking(c)?'<span class="stag">In progress</span>':(isReg(c)?'<span class="stag">Registered</span>':(pre.length&&ent&&ent.w&&pre.some(function(p){ return !metReq(p); })?'<span class="stag">Prereq waived</span>':''))))+more;
+    var badge=sh?'<span class="share s'+Math.min(sh,3)+'" aria-label="Counts toward '+sh+(sh===1?' degree':' degrees')+'" title="Counts toward '+sh+(sh===1?' degree':' degrees')+'">×'+sh+'</span>':(isX?'<span class="share s0" title="A class you added, not part of a degree">added</span>':'<span class="share s0" title="Not part of your degrees, only for transfer">transfer only</span>');
     return '<div class="'+cls+'">'+
-      '<label class="lbl"><input type="checkbox" id="c-'+c.replace(/\s/g,"-")+'" data-code="'+esc(c)+'" data-fk="code:'+esc(c)+'"'+(isDone?" checked":"")+'>'+
-      '<span class="main"><span class="code">'+esc(c)+'</span><span class="ttl">'+esc(t)+'</span></span></label>'+
-      '<div class="meta">'+(isDone?gradeSelect(c,done[c]):(rowOpen===c?ipBtn(c)+rgBtn(c)+'<button class="rowmore" data-rowmenu="'+esc(c)+'" data-fk="rm:'+esc(c)+'" aria-label="Close status options">Done</button>':(isTaking(c)?'<span class="stag">In progress</span>':(isReg(c)?'<span class="stag">Registered</span>':''))+'<button class="rowmore" data-rowmenu="'+esc(c)+'" data-fk="rm:'+esc(c)+'" aria-label="Status options for '+esc(c)+'" title="Mark in progress or registered">⋯</button>'))+
+      '<label class="lbl"><input type="checkbox" id="c-'+c.replace(/\s/g,"-")+'" data-code="'+esc(c)+'" data-fk="code:'+esc(c)+'"'+(isDone?" checked":"")+(lk.length?" disabled":"")+'>'+
+      '<span class="main"><span class="code">'+esc(c)+'</span><span class="ttl">'+esc(t)+'</span>'+preLine(c,lk)+'</span></label>'+
+      '<div class="meta">'+meta+
       '<span class="units">'+u+' units</span>'+
-      (trh?'<span class="trtag" title="Counts for transfer">Transfer · '+esc(TR[c].join(", "))+'</span>':'')+(sh?'<span class="share s'+Math.min(sh,3)+'" aria-label="Counts toward '+sh+(sh===1?' degree':' degrees')+'" title="Counts toward '+sh+(sh===1?' degree':' degrees')+'">×'+sh+'</span>':'<span class="share s0" title="Not part of your degrees, only for transfer">transfer only</span>')+
-      (hl==='off'?'':pipsFor(c))+'</div></div>';
+      (trh?'<span class="trtag" title="Counts for transfer">Transfer · '+esc(TR[c].join(", "))+'</span>':'')+badge+
+      (hl==='off'||isX?'':pipsFor(c))+'</div></div>'+(prOpen===c?preqPanel(c):"");
   }
-
   var openSlots={};
   function slotHtml(opts){
     var key=opts.join("|");
@@ -1153,7 +1233,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
       (lvlUp?'<span class="lvlup" role="status">'+esc(lvlMsg||"LEVEL UP")+'</span>':'')+'</div>'+
       '<div class="xpbar" role="progressbar" aria-label="Progress to next level" aria-valuemin="0" aria-valuemax="'+PER_LEVEL+'" aria-valuenow="'+p.into+'">'+segs+'</div>'+
       '<div class="xp-read"><span class="score"><span class="tag">XP</span><span class="val">'+fmt(p.xp)+'</span></span><span class="next">'+toNext+' XP to level '+(p.lvl+1)+'</span></div>'+
-      '<dl class="mini"><div><dt>Classes done</dt><dd>'+p.n+' / '+ALL.length+'</dd></div><div><dt>Units</dt><dd>'+p.units+'</dd></div><div><dt>In progress</dt><dd>'+p.tn+'</dd></div><div><dt>Registered</dt><dd>'+p.rn+'</dd></div><div><dt>GPA</dt><dd>'+(p.gpa===null?"—":p.gpa.toFixed(2))+'</dd></div></dl>'+
+      '<dl class="mini"><div><dt>Classes done</dt><dd>'+p.n+' / '+(ALL.length+EXTRA.length)+'</dd></div><div><dt>Units</dt><dd>'+p.units+'</dd></div><div><dt>In progress</dt><dd>'+p.tn+'</dd></div><div><dt>Registered</dt><dd>'+p.rn+'</dd></div><div><dt>GPA</dt><dd>'+(p.gpa===null?"—":p.gpa.toFixed(2))+'</dd></div></dl>'+
       '<div class="console"><div class="ctl"><div class="hearts">'+hearts+'</div><span class="ctl-lab">Degrees</span></div></div>');
     setHtml($("howxp"),""); setHtml($("wardwrap"),"");
   }
@@ -1273,6 +1353,10 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
       '<span class="k"><span class="rgbtn on">Registered</span> signed up for next semester</span>');
   }
 
+  function extrasHtml(){
+    var xd=EXTRA.filter(has).length;
+    return '<section class="group"><div class="group-head"><h3>My added classes</h3><span>'+xd+' of '+EXTRA.length+' done</span></div><div class="list fr">'+(EXTRA.length?EXTRA.map(rowHtml).join(""):'<p class="note xempty">Taking a class that is not part of your degrees, or a prerequisite you still need? Add it here.</p>')+'</div><div class="fitrow xaddrow"><button class="link" data-xopen="*" data-fk="xopen:star">+ Add a class</button></div>'+(xOpen==="*"?xform("*"):"")+'</section>';
+  }
   function renderAllView(){
     var N=DEGS.length, out="";
     if(!N) return '<div class="welcome fr"><h2>Welcome</h2><p>Add your degree to start your checklist. Check off each class once and see what is left.</p><div class="fitrow"><button class="link" data-act="guide" data-fk="act:welcomeguide">Get started guide</button><button class="link" data-act="addopen" data-fk="act:welcomeadd">Add my degree</button></div><p class="note">Add more than one degree to see which classes count toward several of them.</p><p class="note">Just looking around? <button class="linkish" data-act="example" data-fk="act:welcomedemo">See an example degree</button></p>'+(STANDALONE?'<p class="note">Back up now and then in Settings, in case your browser clears its data.</p>':'')+'</div>';
@@ -1284,6 +1368,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
       var d=list.filter(has).length;
       out+='<section class="group"><div class="group-head"><h3>'+title+'</h3><span>'+(sub?sub+' · ':'')+d+' of '+list.length+' done</span></div><div class="list fr">'+list.map(rowHtml).join("")+'</div></section>';
     }
+    out+=extrasHtml();
     return out;
   }
 
@@ -1304,7 +1389,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
       h+='<section class="group"><div class="group-head"><h3>'+esc(sec.n)+'</h3><span>'+(sec.u?esc(sec.u)+' · ':'')+g+' of '+n+' done</span></div><div class="list fr">'+
         sec.items.map(function(it){ return Array.isArray(it)?slotHtml(it):rowHtml(it); }).join("")+'</div></section>';
     });
-    return h+'</div>';
+    return h+extrasHtml()+'</div>';
   }
 
   var STATUS={loading:"Loading…",saved:"Saved",saving:"Saving…",local:STANDALONE?"Saved on this device":"Saved in this browser only",slow:"Still connecting…",error:"Could not save. Changes show here only."};
@@ -1327,6 +1412,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     h+='<section class="setbox fr"><h3>3. Have an AI make your file</h3><p>This is the most reliable way, and it works for any college. Copy the prompt, paste it into an AI chat together with your PDF, the AI will either give you a .json file to download or show the code in a box. If you get a file, add it in the next step. If you only get code, use the copy button on the code box and paste it into the app instead.</p><img class="gimg" src="'+GUIDE_SVG[1]+'" alt="Copy the prompt, paste it into an AI chat with your PDF, save the JSON reply, then add it in the app"><div class="fitrow"><button class="link" data-act="guidecopy" data-fk="act:guidecopy">Copy prompt</button></div><p class="note" id="gcopymsg" aria-live="polite"></p></section>';
     h+='<section class="setbox fr"><h3>4. Add it to the app</h3><p>Open Settings, find the Degrees section, and choose the file the AI gave you (or paste its reply). A preview appears. Your degree is added as a new tab when you press Add.</p><img class="gimg" src="'+GUIDE_SVG[0]+'" alt="Choose the file, check the preview, press Add, and the degree appears as a new tab"><div class="fitrow"><button class="link" data-act="settings" data-fk="act:guidesettings">Open Settings</button></div></section>';
     h+='<section class="setbox fr"><h3>5. Check it before you rely on it</h3><p>AI and PDF readers can make mistakes. Before pressing Add, compare the preview with your catalog page:</p><ul class="gcheck"><li>Is the number of classes right?</li><li>Does the total units match the catalog?</li><li>Are the &ldquo;choose one&rdquo; options there?</li><li>Are any classes missing or doubled?</li></ul><p>If something is off, fix it by asking the AI to correct it and add the new file again. Adding it again replaces the old copy.</p><p class="note">Quick option: you can add a catalog PDF straight into the app from Settings. It was built for Chaffey&rsquo;s layout and can be wrong for other colleges and majors, so use the AI steps unless you are sure.</p></section>';
+    h+='<section class="setbox fr"><h3>Prerequisites and extra classes</h3><p>Tap the &#8943; button on a class, then <b>Prereqs</b>. Pick the classes it needs first, or add a class that is not on your list. A class with an unmet prerequisite shows a lock. It unlocks when the prerequisite is done, in progress or registered.</p><p>Got a prerequisite waived? Tap <b>Unlock anyway</b>. Classes you add yourself appear under <b>My added classes</b> and count toward your XP and units.</p></section>';
     h+='<section class="setbox fr"><h3>Optional: transfer plans</h3><p>Planning to transfer? Download your transfer agreement as a PDF (for example from ASSIST) and add it on the Transfer page. It shows which of your classes count toward the bachelor&rsquo;s degree.</p></section>';
     h+='<section class="setbox fr"><h3>Good to know</h3><p>Added the wrong degree? Open it and press Remove this degree. Browsers can clear saved data, so use Backup in Settings now and then. Always confirm requirements with a counselor.</p></section>';
     h+='<div class="fitrow gfoot"><button class="link" data-act="guideclose" data-fk="act:guideclose2">Done</button></div></div>';
@@ -1559,6 +1645,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
 '    { "name": "Section heading from the page", "units": "22-23 units",',
 '      "items": [ "ITIS 10", "ITIS 14", ["ITIS 50", "ITIS 51"] ] }',
 "  ],",
+'  "prereqs": { "ITIS 51": ["ITIS 10"] },',
 '  "courses": [',
 '    { "code": "ITIS 10", "title": "Introduction to Computer Information Systems", "units": 3 }',
 "  ],",
@@ -1572,6 +1659,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
 '- Every code used in sections must appear exactly once in courses, with its full title and unit value as a number.',
 '- Copy facts from the page only. Do not invent classes, units or sections. If something is unclear, say so in notes.',
 '- If a rule needs more than one pick from a list (for example "choose two"), do not guess: describe it in notes and leave that list out of sections.',
+'- "prereqs" is optional. Only list a prerequisite if the page itself states it for a class in this program, and only with codes that appear in "courses". If a class needs several, list them all. Leave "prereqs" out if unsure.',
 '- If I give you several programs, return a JSON array containing one object per program.'
 ].join("\n");
   function normCode(c){ return String(c).replace(/\s+/g," ").trim().toUpperCase(); }
@@ -1608,6 +1696,11 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     if(!secs.length) throw new Error(tag+"no classes found in the sections.");
     var r={name:name, type:o.type===undefined?"":String(o.type).trim(), tag:String(o.code||o.tag||"").trim(), top:String(o.top||""), cip:String(o.cip||""),
       short:String(o.short||name.replace(/\(.*?\)/g,"").trim().split(/\s+/).slice(0,2).join(" ")), sections:secs, courses:courses, notes:o.notes?String(o.notes):""};
+    r.prereqs={};
+    if(o.prereqs&&typeof o.prereqs==="object"&&!Array.isArray(o.prereqs)) Object.keys(o.prereqs).forEach(function(k){
+      var kk=normCode(k), v=o.prereqs[k]; v=(Array.isArray(v)?v:[v]).map(normCode).filter(function(p,i,a){ return p!==kk&&courses[p]&&a.indexOf(p)===i; });
+      if(courses[kk]&&v.length) r.prereqs[kk]=v;
+    });
     var calc=unitsOf(r);
     r.units=Array.isArray(o.units)&&o.units.length>=2&&isFinite(o.units[0])?[Number(o.units[0]),Number(o.units[1])]:(isFinite(o.units)&&o.units!==null&&o.units!==""?[Number(o.units),Number(o.units)]:calc);
     return r;
@@ -1686,7 +1779,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     var id="x"+r.short.toLowerCase().replace(/[^a-z0-9]+/g,"")+r.major.toLowerCase().replace(/[^a-z0-9]+/g,"").slice(0,10);
     var ag={id:id,short:r.short,uni:r.uni,from:r.from,major:r.major,year:r.year,groups:r.groups};
     var list=cat.transfers.filter(function(a){ return a.id!==id; }), had=list.length!==cat.transfers.length;
-    list.push(ag); cat={degs:cat.degs,courses:cat.courses,transfers:list}; rebuild();
+    list.push(ag); cat=mkCat(cat.degs,cat.courses,list); rebuild();
     pend.splice(i,1); mgrNote=(had?"Updated ":"Added ")+"transfer agreement: "+r.short+" · "+r.major;
     tab="xfer"; xsel=Math.max(0,cat.transfers.length-1); render(); queueSave();
   }
@@ -1704,17 +1797,39 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     degs.splice(idx,0,deg);
     var courses={}; Object.keys(cat.courses).forEach(function(c){ courses[c]=cat.courses[c]; });
     Object.keys(r.courses).forEach(function(c){ if(!courses[c]) courses[c]=r.courses[c]; });
-    cat={degs:degs,courses:courses,transfers:cat.transfers}; rebuild();
+    cat=mkCat(degs,courses,cat.transfers);
+    Object.keys(r.prereqs||{}).forEach(function(k){ setPrereq(k,function(e){ r.prereqs[k].forEach(function(p){ if(e.n.indexOf(p)<0) e.n.push(p); }); }); });
+    rebuild();
     pend.splice(i,1); mgrNote=(ex?"Updated ":"Added ")+r.name+".";
     var b=snap(); tab=id; render(); queueSave(); stateChanged(b);
   }
   function removeTransfer(id){
-    cat={degs:cat.degs,courses:cat.courses,transfers:cat.transfers.filter(function(a){ return a.id!==id; })}; rebuild();
+    cat=mkCat(cat.degs,cat.courses,cat.transfers.filter(function(a){ return a.id!==id; })); rebuild();
     confirmDel=null; mgrNote="Transfer agreement removed."; if(tab==="xfer"&&!cat.transfers.length) tab="all"; xsel=0; render(); queueSave();
+  }
+  function addExtra(f){
+    var code=normCode($("xcode").value), title=$("xtitle").value.replace(/\s+/g," ").trim(), u=parseFloat($("xunits").value), m=$("xmsg");
+    function bad(t){ m.textContent=t; }
+    if(!/^[A-Z][A-Z&]*\s?[A-Z]?\d/.test(code)) return bad("Enter a class code like MATH 10.");
+    if(!title) title=code;
+    if(!isFinite(u)||u<0||u>12) return bad("Units should be a number from 0 to 12.");
+    if(COURSES[code]||TCOURSES[code]) return bad(code+" is already in your list. Pick it from the list instead.");
+    var cs={}; Object.keys(cat.courses).forEach(function(k){ cs[k]=cat.courses[k]; }); cs[code]=[title,u];
+    var ex=(cat.extra||[]).slice(); ex.push(code);
+    var n=mkCat(cat.degs,cs,cat.transfers); n.extra=ex; cat=n;
+    if(f!=="*") setPrereq(f,function(e){ if(e.n.indexOf(code)<0) e.n.push(code); });
+    xOpen=""; rebuild(); $("panel")._h=null; render(); queueSave();
+  }
+  function removeExtra(c){
+    var cs={}; Object.keys(cat.courses).forEach(function(k){ if(k!==c) cs[k]=cat.courses[k]; });
+    var n=mkCat(cat.degs,cs,cat.transfers); n.extra=(cat.extra||[]).filter(function(k){ return k!==c; }); if(!n.extra.length) delete n.extra;
+    var pr={}; Object.keys(cat.prereqs||{}).forEach(function(k){ if(k===c) return; var e=cat.prereqs[k], nn=e.n.filter(function(p){ return p!==c; }); if(nn.length) pr[k]={n:nn,w:!!e.w}; });
+    if(Object.keys(pr).length) n.prereqs=pr; else delete n.prereqs;
+    cat=n; delete done[c]; delete taking[c]; delete reg[c]; prOpen=""; xdelAsk=""; rebuild(); $("panel")._h=null; render(); queueSave();
   }
   function removeDegree(id){
     if(id.slice(0,2)==="t:") return removeTransfer(id.slice(2));
-    cat={degs:DEGS.filter(function(d){ return d.id!==id; }),courses:cat.courses,transfers:cat.transfers}; rebuild();
+    cat=mkCat(DEGS.filter(function(d){ return d.id!==id; }),cat.courses,cat.transfers); rebuild();
     confirmDel=null; mgrNote="Degree removed. Your checked classes are kept in case you add it back.";
     render(); queueSave();
   }
@@ -1736,7 +1851,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
       var nC=Object.keys(r.courses).length, off=Math.abs(r.sumMin-r.units[0])>1;
       h+='<div class="pend fr"><b>'+esc(dName(r))+'</b><span class="codes">'+(r.tag?esc(r.tag)+' · ':'')+nC+' classes · '+r.units[0]+(r.units[1]!==r.units[0]?'–'+r.units[1]:'')+' units</span>'+
         '<ul>'+r.sections.map(function(s){ return '<li>'+esc(s.n)+' <i>('+s.items.length+' requirements'+(s.items.some(Array.isArray)?', '+s.items.filter(Array.isArray).length+' pick-one':'')+')</i></li>'; }).join("")+'</ul>'+
-        (r.notes?'<p class="note warn">Note: '+esc(r.notes)+'</p>':'')+(r.viaPdf?'<p class="note warn">Read automatically from the page text, which can miss or misread classes'+((nC<4||!r.units[0])?'. This one looks incomplete, so try the AI steps instead':'')+'.</p>':'')+'<p class="note warn">Before you add it, compare with your catalog: the number of classes, the total units, and any pick-one choices.</p>'+(off?'<p class="note warn">Heads up: the classes I found add up to '+r.sumMin+' units, but the catalog total says '+r.units[0]+'. Check the lists after adding.</p>':'')+
+        (r.notes?'<p class="note warn">Note: '+esc(r.notes)+'</p>':'')+(r.prereqs&&Object.keys(r.prereqs).length?'<p class="note warn">Found prerequisites for '+Object.keys(r.prereqs).length+' class'+(Object.keys(r.prereqs).length===1?'':'es')+'. Check them against the catalog after adding: '+Object.keys(r.prereqs).map(function(k){ return esc(k)+' needs '+r.prereqs[k].map(esc).join(', '); }).join('; ')+'.</p>':'')+(r.viaPdf?'<p class="note warn">Read automatically from the page text, which can miss or misread classes'+((nC<4||!r.units[0])?'. This one looks incomplete, so try the AI steps instead':'')+'.</p>':'')+'<p class="note warn">Before you add it, compare with your catalog: the number of classes, the total units, and any pick-one choices.</p>'+(off?'<p class="note warn">Heads up: the classes I found add up to '+r.sumMin+' units, but the catalog total says '+r.units[0]+'. Check the lists after adding.</p>':'')+
         '<div class="fitrow"><button class="link" data-addpend="'+i+'" data-fk="addpend:'+i+'">'+(ex?'Replace existing':'Add this degree')+'</button><button class="chip" data-droppend="'+i+'" data-fk="droppend:'+i+'">Discard</button></div></div>';
     });
     h+='<h4>Your degrees</h4><ul class="dlist">'+DEGS.map(function(d){
@@ -1817,6 +1932,16 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     else if(a==="rmchar"){ setMine(""); render(); queueSave(); }
     else if(a==="theme"){ toggleTheme(); }
     else if(A("data-skin")!==null){ setSkin(A("data-skin")); render(); queueSave(); }
+    else if(A("data-pr")!==null){ var pc=A("data-pr"); prOpen=(prOpen===pc?"":pc); xOpen=""; xdelAsk=""; $("panel")._h=null; render(); }
+    else if(A("data-prdel")!==null){ var pp=A("data-prdel").split("|"); setPrereq(pp[0],function(e){ e.n=e.n.filter(function(q){ return q!==pp[1]; }); }); $("panel")._h=null; render(); queueSave(); }
+    else if(A("data-pradd")!==null){ var ac=A("data-pradd"), sel=$("prsel"), pv=sel?sel.value:""; if(pv&&pv!==ac&&!dependsOn(pv,ac)){ setPrereq(ac,function(e){ if(e.n.indexOf(pv)<0) e.n.push(pv); }); $("panel")._h=null; render(); queueSave(); } }
+    else if(A("data-unlock")!==null){ var uc=A("data-unlock"); setPrereq(uc,function(e){ e.w=true; }); $("panel")._h=null; render(); queueSave(); }
+    else if(A("data-relock")!==null){ var rc=A("data-relock"); setPrereq(rc,function(e){ e.w=false; }); $("panel")._h=null; render(); queueSave(); }
+    else if(A("data-xopen")!==null){ xOpen=A("data-xopen"); $("panel")._h=null; render(); var xc=$("xcode"); if(xc) try{ xc.focus(); }catch(er){} }
+    else if(A("data-xadd")!==null){ addExtra(A("data-xadd")); }
+    else if(A("data-xdel")!==null){ xdelAsk=A("data-xdel"); $("panel")._h=null; render(); }
+    else if(A("data-xdelno")!==null){ xdelAsk=""; $("panel")._h=null; render(); }
+    else if(A("data-xdelyes")!==null){ removeExtra(A("data-xdelyes")); }
     else if(a==="guide"){ tab="guide"; render(); window.scrollTo(0,0); }
     else if(a==="guideclose"){ tab="all"; render(); window.scrollTo(0,0); }
     else if(a==="guidecopy"){
@@ -1828,7 +1953,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     else if(a==="example"){
       if(!DEGS.some(function(d){ return d.id==="example"; })){
         var cs={}; Object.keys(cat.courses).forEach(function(k){ cs[k]=cat.courses[k]; }); Object.keys(EX_COURSES).forEach(function(k){ cs[k]=EX_COURSES[k]; });
-        cat={degs:cat.degs.concat([JSON.parse(JSON.stringify(EX_DEG))]),courses:cs,transfers:cat.transfers}; rebuild(); queueSave();
+        cat=mkCat(cat.degs.concat([JSON.parse(JSON.stringify(EX_DEG))]),cs,cat.transfers); rebuild(); queueSave();
       }
       tab="example"; render(); window.scrollTo(0,0);
     }
