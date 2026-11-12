@@ -570,6 +570,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
 .prchip button{background:transparent;border:0;color:var(--mid);min-width:30px;min-height:30px;cursor:pointer;font-size:13px}
 .xempty{padding:10px 12px;margin:0}
 .xaddrow{margin-top:8px}
+html,body{overflow-x:clip}
 
 /* skins: original blueprint = no data-skin attribute */
 :root[data-skin="ticket"][data-theme="light"]{--bg:#E7DFC8;--panel:#F4EEDC;--ink:#2A2C32;--mid:#5F5A4C;--faint:#A8A18E;--line:#B9B19B;--soft:#DDD4BA;--hit:#D3C9AC;--warn:#9A4A00;--accent:#C8321F;--onaccent:#FBF3E0;--tr:#2B6F7A;--trt:#2B6F7A;--display:'Barlow Condensed','Arial Narrow',sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--rad:2px;--bw:1.5px}
@@ -687,7 +688,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
 
   <footer class="support">
     <p class="note">No accounts, no tracking, no ads. Your progress never leaves your device.</p>
-    <p class="note"><a class="link tip" id="about" href="https://github.com/gho5t-byt3/Degree-checklist#readme" target="_blank" rel="noopener noreferrer">About / README</a></p>
+    <p class="note"><a class="link tip" id="about" href="https://github.com/gho5t-byt3/Degree-checklist#readme" target="_blank" rel="noopener noreferrer">About / README</a> <a class="link tip" id="feedback" href="https://forms.gle/RCWSkktc8uVZHWTt5" target="_blank" rel="noopener noreferrer">Send feedback</a></p>
     <div id="tipbox" hidden><p class="note">Free and private. Tips keep it going.</p><a class="link tip" id="tip" href="#" target="_blank" rel="noopener noreferrer">Support</a></div>
   </footer>
 
@@ -1434,7 +1435,7 @@ body[data-page="guide"] #hud,body[data-page="guide"] #mgr{display:none}
     }).join("")+'</div></section>';
     h+='<section class="setbox fr"><h3>Character</h3>'+charsHtml().replace('<div class="chars-wrap"><h4>Character</h4>','<div class="chars-wrap">')+'</section>';
     h+='<section class="setbox fr"><h3>Guide</h3><p class="note">Step-by-step help for adding your degree.</p><div class="fitrow"><button class="link" data-act="guide" data-fk="act:guideopen">Get started guide</button></div></section>';
-    h+='<section class="setbox fr"><h3>About</h3><p class="note">How it works, how to add a degree, and privacy details.</p><div class="fitrow"><a class="link tip" href="https://github.com/gho5t-byt3/Degree-checklist#readme" target="_blank" rel="noopener noreferrer">About / README</a></div></section>';
+    h+='<section class="setbox fr"><h3>About</h3><p class="note">How it works, how to add a degree, and privacy details. Feedback is optional. The form is a Google Form, and only what you type into it is sent.</p><div class="fitrow"><a class="link tip" href="https://github.com/gho5t-byt3/Degree-checklist#readme" target="_blank" rel="noopener noreferrer">About / README</a><a class="link tip" href="https://forms.gle/RCWSkktc8uVZHWTt5" target="_blank" rel="noopener noreferrer">Send feedback</a></div></section>';
     h+='<section class="setbox fr"><h3>How XP works</h3><p class="note">100 XP per unit. Grade bonus: A +100, B +60, C +30, D +10, Pass +30. 500 XP per level.</p></section>';
     return h+'<h3 class="sethead">Degrees</h3></div>';
   }

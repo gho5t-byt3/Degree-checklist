@@ -78,6 +78,8 @@ Progress is stored in your browser on your own device. Clearing website data, de
 
 Your progress, grades, character and added degrees stay in your browser's storage and are never sent anywhere. There is no server and no account. Files you add are read inside your browser and are not uploaded. The app has no ads or analytics.
 
+The optional feedback form (linked in the app) is a Google Form. Only what you type into it is sent, and it is anonymous unless you leave an email. Please don't enter private information there.
+
 Two honest notes: GitHub, as the host, can see ordinary web traffic such as visit counts, and the fonts load from Google Fonts (a theme's extra fonts load only if you pick that theme). Neither can see anyone's progress.
 
 ## Heads up
