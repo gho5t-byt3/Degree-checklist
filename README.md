@@ -53,6 +53,7 @@ To undo a mistake, open the degree and press **Remove this degree**.
 
 ## Features
 
+- A built-in Get started guide with pictures, on the welcome screen and in Settings, so you don't need this page
 - Check off classes once, see progress across every degree
 - Shared-class highlighting, in-progress and registered statuses
 - XP and levels, GPA, a character you can pick or upload
